@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hello Kitty Gallery</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #ffe4f0, #fff0f5);
+    }
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 192, 203, 0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+    .lightbox.show {
+      display: flex;
+      animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 1rem;
+      box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+      animation: popIn 0.3s;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .gallery-img-container {
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.8s;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .img-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,182,193,0.8);
+      color: #b91c5c;
+      opacity: 0;
+      transition: opacity 0.3s;
+      padding: 0.5rem 0;
+      font-weight: bold;
+      font-size: 1.1rem;
+      text-align: center;
+      pointer-events: none;
+    }
+    .gallery-img-container:hover .img-overlay {
+      opacity: 1;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: #fff0f5;
+      border: none;
+      border-radius: 9999px;
+      font-size: 2rem;
+      color: #b91c5c;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(255,182,193,0.3);
+      z-index: 1100;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .lightbox-close:hover {
+      background: #ffb6c1;
+      color: #fff;
+    }
+  </style>
+</head>
+<body class="text-pink-800 font-sans">
+  <header class="bg-gradient-to-r from-pink-200 via-pink-100 to-pink-50 shadow-lg p-4 flex justify-between items-center sticky top-0 z-50">
+    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3">
+      <!-- Better Hello Kitty SVG Icon -->
+      <span>
+        <svg width="36" height="36" viewBox="0 0 64 64" fill="none" class="inline-block align-middle" xmlns="http://www.w3.org/2000/svg">
+          <!-- Face outline -->
+          <ellipse cx="32" cy="36" rx="18" ry="14" fill="#fff" stroke="#222" stroke-width="2"/>
+          <!-- Left ear -->
+          <path d="M18 22 Q14 10 26 18" fill="#fff" stroke="#222" stroke-width="2"/>
+          <!-- Right ear -->
+          <path d="M46 22 Q50 10 38 18" fill="#fff" stroke="#222" stroke-width="2"/>
+          <!-- Eyes -->
+          <ellipse cx="25" cy="36" rx="2" ry="3" fill="#222"/>
+          <ellipse cx="39" cy="36" rx="2" ry="3" fill="#222"/>
+          <!-- Nose -->
+          <ellipse cx="32" cy="41" rx="2" ry="1.2" fill="#FBBF24" stroke="#222" stroke-width="1"/>
+          <!-- Whiskers left -->
+          <path d="M13 36 Q7 34 13 32" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+          <path d="M13 40 Q5 40 13 44" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+          <!-- Whiskers right -->
+          <path d="M51 36 Q57 34 51 32" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+          <path d="M51 40 Q59 40 51 44" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+          <!-- Bow -->
+          <ellipse cx="23" cy="28" rx="3" ry="2" fill="#F472B6" stroke="#C02660" stroke-width="1"/>
+          <ellipse cx="19.5" cy="26" rx="2" ry="2.5" fill="#F472B6" stroke="#C02660" stroke-width="1"/>
+          <ellipse cx="26.5" cy="26" rx="2" ry="2.5" fill="#F472B6" stroke="#C02660" stroke-width="1"/>
+        </svg>
+      </span>
+      <span class="bg-gradient-to-r from-pink-500 via-pink-400 to-pink-300 bg-clip-text text-transparent drop-shadow-lg">MY BEAUTIFUL GIRLFRIEND GALLERY</span>
+    </h1>
+    <nav>
+      <!-- Burger menu button (mobile) -->
+      <button id="burger" class="md:hidden flex items-center px-3 py-2 border rounded text-pink-700 border-pink-300 hover:bg-pink-200 focus:outline-none transition-all duration-200" aria-label="Open menu">
+        <svg class="fill-current h-7 w-7" viewBox="0 0 20 20">
+          <title>Menu</title>
+          <path d="M0 3h20v2H0zM0 9h20v2H0zM0 15h20v2H0z"/>
+        </svg>
+      </button>
+      <!-- Navigation links -->
+      <ul id="nav-menu" class="flex-col md:flex-row md:flex space-y-2 md:space-y-0 md:space-x-6 text-base font-semibold text-pink-700 fixed md:static top-20 left-0 w-full md:w-auto bg-white/90 md:bg-transparent shadow-lg md:shadow-none z-40 md:z-auto hidden md:flex rounded-b-2xl md:rounded-none transition-all"></ul>
+        
+        <li><a href="#home" class="block px-6 py-3 rounded-xl hover:bg-pink-200 hover:text-pink-900 transition">Home</a></li>
+        <li><a href="#about" class="block px-6 py-3 rounded-xl hover:bg-pink-200 hover:text-pink-900 transition">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section id="home" class="text-center py-12 px-4">
+    <h2 class="text-4xl sm:text-5xl font-extrabold mb-4 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">✨ MY WIFE ✨</h2>
+    <p class="text-pink-700 max-w-xl mx-auto text-lg sm:text-xl font-medium bg-white/60 rounded-xl py-4 px-6 shadow">Explore my adorable picture of my wife</p>
+  </section>
+
+  <main class="px-2 sm:px-6 pb-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+    <div class="gallery-img-container flex justify-center items-center">
+      <img src="1c03c6ad-163d-46b5-ba3b-40e9efca7e9a.jpg" alt="Hello Kitty with Balloons"
+        style="width:220px;height:220px;"
+        class="object-cover rounded-3xl shadow-2xl border-4 border-pink-300 hover:scale-105 hover:shadow-pink-300/60 transition-transform duration-300 cursor-pointer"
+        onclick="openLightbox(this.src, '', `My love, you are the reason my heart feels so light and free. Every day with you is a celebration of happiness. Thank you for being my everything. 💖`)" />
+    </div>
+    <div class="gallery-img-container flex justify-center items-center">
+      <img src="6189990c-0cb1-4ff1-95c2-b3a99c9be2df.jpg" alt="Hello Kitty Picnic"
+        style="width:220px;height:220px;"
+        class="object-cover rounded-3xl shadow-2xl border-4 border-pink-300 hover:scale-105 hover:shadow-pink-300/60 transition-transform duration-300 cursor-pointer"
+        onclick="openLightbox(this.src, '', `Every moment spent with you is a beautiful memory I cherish. Your laughter fills my soul and your love completes my world. 🌸`)" />
+    </div>
+    <div class="gallery-img-container flex justify-center items-center">
+      <img src="624e5997-3433-4332-aecf-533fcb0b410e.jpg" alt="Hello Kitty and Friends"
+        style="width:220px;height:220px;"
+        class="object-cover rounded-3xl shadow-2xl border-4 border-pink-300 hover:scale-105 hover:shadow-pink-300/60 transition-transform duration-300 cursor-pointer"
+        onclick="openLightbox(this.src, '', `You are not just my love, but my best friend and my greatest blessing. I am grateful for every moment we share together. 🥰`)" />
+    </div>
+    <div class="gallery-img-container flex justify-center items-center">
+      <img src="a92692ad-5258-40fd-8a4c-b031f728d85b.jpg" alt="Hello Kitty Baking"
+        style="width:220px;height:220px;"
+        class="object-cover rounded-3xl shadow-2xl border-4 border-pink-300 hover:scale-105 hover:shadow-pink-300/60 transition-transform duration-300 cursor-pointer"
+        onclick="openLightbox(this.src, '', `You are the sweetest part of my life. With you, every day is filled with warmth, joy, and endless love. 🍰`)" />
+    </div>
+    <div class="gallery-img-container flex justify-center items-center">
+      <img src="aeadc176-2748-445b-adea-ed20bff61d17.jpg" alt="Hello Kitty in Garden"
+        style="width:220px;height:220px;"
+        class="object-cover rounded-3xl shadow-2xl border-4 border-pink-300 hover:scale-105 hover:shadow-pink-300/60 transition-transform duration-300 cursor-pointer"
+        onclick="openLightbox(this.src, '', `Like a flower blooming in spring, my love for you grows more beautiful with each passing day. You are my sunshine and my heart. 🌷`)" />
+    </div>
+    <div class="gallery-img-container flex justify-center items-center">
+      <img src="bcfbedcd-4992-4676-8cb2-f2ce10a3ce47.jpg" alt="Hello Kitty Tea Time"
+        style="width:220px;height:220px;"
+        class="object-cover rounded-3xl shadow-2xl border-4 border-pink-300 hover:scale-105 hover:shadow-pink-300/60 transition-transform duration-300 cursor-pointer"
+        onclick="openLightbox(this.src, '', `Your presence is my comfort and your love is my peace. Every moment with you is sweeter than the last. I adore you. ☕💕`)" />
+    </div>
+    <div class="gallery-img-container flex justify-center items-center">
+      <img src="c4627129-bd9d-40a7-bec7-c56a167d3d6b.jpg" alt="Hello Kitty Reading"
+        style="width:220px;height:220px;"
+        class="object-cover rounded-3xl shadow-2xl border-4 border-pink-300 hover:scale-105 hover:shadow-pink-300/60 transition-transform duration-300 cursor-pointer"
+        onclick="openLightbox(this.src, '', `Our love story is my favorite tale. I look forward to writing every new chapter with you, my forever. 📖💗`)" />
+    </div>
+    <div class="gallery-img-container flex justify-center items-center">
+      <img src="cb45bf18-9452-4f06-82b5-396962350f41.jpg" alt="Hello Kitty with Flowers"
+        style="width:220px;height:220px;"
+        class="object-cover rounded-3xl shadow-2xl border-4 border-pink-300 hover:scale-105 hover:shadow-pink-300/60 transition-transform duration-300 cursor-pointer"
+        onclick="openLightbox(this.src, '', `You are the most beautiful flower in the garden of my heart. My love for you grows deeper every single day. 🌸💝`)" />
+    </div>
+  </main>
+
+  <!-- Enhanced Lightbox -->
+  <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+    <div class="relative bg-white/95 rounded-3xl shadow-2xl flex flex-col md:flex-row items-center max-w-3xl w-full mx-4 p-6 md:p-10 border-4 border-pink-200" style="gap:2rem;" onclick="event.stopPropagation()">
+      <button class="lightbox-close absolute top-4 right-4" onclick="closeLightbox(event)" aria-label="Close">&times;</button>
+      <img id="lightbox-img" src="" alt="Expanded view" class="w-64 h-64 object-cover rounded-2xl border-4 border-pink-300 shadow-lg mb-6 md:mb-0"/>
+      <div class="flex-1 flex flex-col justify-center items-start md:pl-8">
+        <div id="lightbox-caption" class="text-pink-900 font-bold text-xl mb-2"></div>
+        <div id="lightbox-letter" class="bg-gradient-to-br from-pink-50 via-pink-100 to-pink-200 border border-pink-200 rounded-xl p-4 text-pink-700 text-base md:text-lg shadow-inner italic" style="min-width:220px; max-width:320px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="about" class="bg-gradient-to-br from-pink-50 via-pink-100 to-pink-200 py-10 px-4 text-center shadow-inner rounded-3xl mx-2 my-8">
+    <h2 class="text-3xl font-extrabold mb-2 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">About My Girlfriend</h2>
+    <p class="max-w-2xl mx-auto text-pink-700 text-lg font-medium">
+      My girlfriend is the most beautiful person I have ever known—inside and out. Her smile brightens my world, her kindness inspires me, and her love makes every day feel magical. She is my sunshine, my happiness, and my greatest blessing. I am endlessly grateful to have her in my life. 💖
+    </p>
+  </section>
+
+  <footer class="bg-gradient-to-r from-pink-200 via-pink-100 to-pink-50 text-center p-6 mt-auto shadow-inner text-sm text-pink-600 font-medium rounded-t-2xl">
+    &copy; 2025 Hello Kitty Fans. All pink rights reserved. 🎀
+  </footer>
+
+  <script>
+    // Burger menu toggle
+    const burger = document.getElementById('burger');
+    const navMenu = document.getElementById('nav-menu');
+    burger.addEventListener('click', function() {
+      navMenu.classList.toggle('hidden');
+      // Prevent body scroll when nav is open on mobile
+      if(window.innerWidth < 768) {
+        document.body.style.overflow = navMenu.classList.contains('hidden') ? '' : 'hidden';
+      }
+    });
+
+    function openLightbox(src, caption, letter) {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox-caption').textContent = caption || '';
+      document.getElementById('lightbox-letter').innerHTML = letter || '';
+      document.getElementById('lightbox').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox(event) {
+      // Only close if background or close button is clicked
+      if (!event || event.target === event.currentTarget || event.target.classList.contains('lightbox-close')) {
+        document.getElementById('lightbox').classList.remove('show');
+        document.getElementById('lightbox-img').src = '';
+        document.getElementById('lightbox-caption').textContent = '';
+        document.getElementById('lightbox-letter').innerHTML = '';
+        document.body.style.overflow = '';
+      }
+    }
+    // Smooth scroll for nav links
+    document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          window.scrollTo({ top: target.offsetTop - 70, behavior: 'smooth' });
+        }
+        // Close menu on mobile after click
+        if(window.innerWidth < 768) {
+          navMenu.classList.add('hidden');
+          document.body.style.overflow = '';
+        }
+      });
+    });
+    // Hide nav menu on resize if desktop
+    window.addEventListener('resize', function() {
+      if(window.innerWidth >= 768) {
+        navMenu.classList.remove('hidden');
+        document.body.style.overflow = '';
+      } else {
+        navMenu.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
